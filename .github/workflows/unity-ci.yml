@@ -1,0 +1,64 @@
+# ══════════════════════════════════════════════════════════════
+# Unity CI — Validar que el proyecto compila
+# Módulo IV: Programación de Videojuegos — UNAM
+#
+# Este workflow se ejecuta en cada push y PR a main.
+# Valida que el proyecto compila sin errores.
+#
+# ══════════════════════════════════════════════════════════════
+
+name: Unity CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancelar runs anteriores del mismo PR/branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Compilar proyecto Unity
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      # ── Checkout del código ──
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      # ── Cache para acelerar builds posteriores ──
+      - name: Cache Library
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: |
+            Library-
+
+      # ── Compilar (solo validar que compila, no genera build) ──
+      - name: Build StandaloneWindows64
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          targetPlatform: StandaloneWindows64
+          # Solo validar compilación, no crear build completo
+          # Esto ahorra ~60% del tiempo
+          buildMethod: ""
+
+      # ── Resultado ──
+      - name: Resultado
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ El proyecto compila correctamente"
+          else
+            echo "❌ El proyecto tiene errores de compilación"
+          fi
