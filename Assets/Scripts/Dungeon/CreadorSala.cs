@@ -56,8 +56,6 @@ public class CreadorSala : MonoBehaviour
                 Instantiate(pared, new Vector3(origenSala.x , 1.25f, origenSala.y + (tamPared.y/2) + (tamPared.y*i)), Quaternion.Euler(0,90,0));
                 Instantiate(pared, new Vector3(origenSala.x + tamSala.x-(tamPared.z/2), 1.25f, origenSala.y + (tamPared.y/2) + (tamPared.y*i)), Quaternion.Euler(0,90,0));
             }
-            
         }
-
     }
 }
