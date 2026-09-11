@@ -1,6 +1,5 @@
 using UnityEngine;
 using System.Collections.Generic;
-using System.Linq;
 
 public class Sala
 {
@@ -22,6 +21,9 @@ public class Sala
     public TipoSala tipo;
     public int nivel;
     public int[] puertas = {0,0,0,0};
+    public List<GameObject> listaPisos = new List<GameObject>();
+    public List<GameObject> listaParedes = new List<GameObject>();
+    public List<GameObject> listaArcos = new List<GameObject>();
 
     public Sala(Vector3 _tamPared, Vector3 _tamArco, Vector3 _tamPiso, Vector2 _tam, Vector2 _origen, TipoSala _tipo, int _nivel, int[] _puertas)
     {
@@ -61,27 +63,50 @@ public class Sala
         nivel = _nivel;
         puertas = _puertas;
     }
-
-
 }
 
 public class DungeonMasterScript : MonoBehaviour
 {
     private List<Sala> listaSalas = new List<Sala>();
+    private int maxSalas = 6;
     [SerializeField] GameObject pared;
     [SerializeField] GameObject piso;
     [SerializeField] GameObject arco;
 
     void Start()
     {
-        int[] arregloAux = {0,0,0,1};
-        listaSalas.Add(new Sala());
-        listaSalas.Add(new Sala(new Vector2(12.5f,0), Sala.TipoSala.COMBATE, arregloAux, 1));
-
+        //Variables auxiliares para la generación de las salas del nivel.
+        Vector2 posicionSalaActual = new Vector2(0,0);
+        int[] arcosSalaAnterior = {0,0,0,0};
+        int nivel = 1;
+        int actualSalas = 0;
+        
+        for(int i=0; i<maxSalas; i++)
+        {
+            if(i == 0)//Caso inicial.
+            {
+                listaSalas.Add(new Sala());
+                arcosSalaAnterior = listaSalas[0].puertas;
+            }
+            else if(i == 6) //Sala de jefe (y sala de Grada).
+            {
+                //arregloFinal[i] = arreglo1[i] | arreglo2[i];
+                listaSalas.Add(new Sala(posicionSalaActual, DeterminarTipoSala(5), DeterminarArcos(Random.Range(2,4), arcosSalaAnterior), nivel));
+                listaSalas.Add(new Sala(posicionSalaActual, DeterminarTipoSala(6), DeterminarArcos(Random.Range(2,4), arcosSalaAnterior), nivel));
+            }
+            else //Cualquier sala.
+            {
+                //por cada arco en la sala anterior
+                    //Crear sala de cada arco.
+                    listaSalas.Add(new Sala(posicionSalaActual, DeterminarTipoSala(Random.Range(2,5)), DeterminarArcos(Random.Range(1,4), arcosSalaAnterior), nivel));
+            }
+        }
+        
         for(int i=0; i<listaSalas.Count; i++)
         {
             CrearSala(listaSalas[i]);
         }
+
     }
 
     private void CrearSala(Sala salaNueva)
@@ -91,7 +116,7 @@ public class DungeonMasterScript : MonoBehaviour
         {
             for(int j=0; j<(salaNueva.tam.y/salaNueva.tamPiso.z); j++)
             {
-                Instantiate(piso, new Vector3(salaNueva.origen.x + (salaNueva.tamPiso.x/2) + (salaNueva.tamPiso.x*j), 0f, salaNueva.origen.y + (salaNueva.tamPiso.z*i)), Quaternion.Euler(0,0,0));
+                salaNueva.listaPisos.Add(Instantiate(piso, new Vector3(salaNueva.origen.x + (salaNueva.tamPiso.x/2) + (salaNueva.tamPiso.x*j), 0f, salaNueva.origen.y + (salaNueva.tamPiso.z*i)), Quaternion.Euler(0,0,0)));
             }
         }
 
@@ -101,11 +126,11 @@ public class DungeonMasterScript : MonoBehaviour
         {
             if (salaNueva.origen.x + (salaNueva.tamPared.x/2) + (salaNueva.tamPared.x*i) == salaNueva.tam.x/2 && salaNueva.puertas[0] == 1)
             {
-                Instantiate(arco, new Vector3(salaNueva.origen.x + (salaNueva.tamPared.x/2) + (salaNueva.tamPared.x*i), 1.25f, salaNueva.origen.y), Quaternion.Euler(0,0,0));
+                salaNueva.listaArcos.Add(Instantiate(arco, new Vector3(salaNueva.origen.x + (salaNueva.tamPared.x/2) + (salaNueva.tamPared.x*i), 1.25f, salaNueva.origen.y), Quaternion.Euler(0,0,0)));
             }
             else
             {
-                Instantiate(pared, new Vector3(salaNueva.origen.x + (salaNueva.tamPared.x/2) + (salaNueva.tamPared.x*i), 1.25f, salaNueva.origen.y), Quaternion.Euler(0,0,0));
+                salaNueva.listaParedes.Add(Instantiate(pared, new Vector3(salaNueva.origen.x + (salaNueva.tamPared.x/2) + (salaNueva.tamPared.x*i), 1.25f, salaNueva.origen.y), Quaternion.Euler(0,0,0)));
             }
         }
         //Este
@@ -113,11 +138,11 @@ public class DungeonMasterScript : MonoBehaviour
         {
             if (salaNueva.origen.y + (salaNueva.tamPared.y/2) + (salaNueva.tamPared.y*i) == salaNueva.tam.y/2 && salaNueva.puertas[1] == 1)
             {
-                Instantiate(arco, new Vector3(salaNueva.origen.x + salaNueva.tam.x, 1.25f, salaNueva.origen.y + (salaNueva.tamPared.y/2) + (salaNueva.tamPared.y*i)), Quaternion.Euler(0,-90,0));
+                salaNueva.listaArcos.Add(Instantiate(arco, new Vector3(salaNueva.origen.x + salaNueva.tam.x, 1.25f, salaNueva.origen.y + (salaNueva.tamPared.y/2) + (salaNueva.tamPared.y*i)), Quaternion.Euler(0,-90,0)));
             }
             else
             {
-                Instantiate(pared, new Vector3(salaNueva.origen.x + salaNueva.tam.x, 1.25f, salaNueva.origen.y + (salaNueva.tamPared.y/2) + (salaNueva.tamPared.y*i)), Quaternion.Euler(0,-90,0));
+                salaNueva.listaParedes.Add(Instantiate(pared, new Vector3(salaNueva.origen.x + salaNueva.tam.x, 1.25f, salaNueva.origen.y + (salaNueva.tamPared.y/2) + (salaNueva.tamPared.y*i)), Quaternion.Euler(0,-90,0)));
             }
         }
         //Norte
@@ -125,11 +150,11 @@ public class DungeonMasterScript : MonoBehaviour
         {
             if (salaNueva.origen.x + (salaNueva.tamPared.x/2) + (salaNueva.tamPared.x*i) == salaNueva.tam.x/2 && salaNueva.puertas[2] == 1)
             {
-                Instantiate(arco, new Vector3(salaNueva.origen.x + (salaNueva.tamPared.x/2) + (salaNueva.tamPared.x*i), 1.25f, salaNueva.origen.y+salaNueva.tam.y), Quaternion.Euler(0,180,0));
+                salaNueva.listaArcos.Add(Instantiate(arco, new Vector3(salaNueva.origen.x + (salaNueva.tamPared.x/2) + (salaNueva.tamPared.x*i), 1.25f, salaNueva.origen.y+salaNueva.tam.y), Quaternion.Euler(0,180,0)));
             }
             else
             {
-                Instantiate(pared, new Vector3(salaNueva.origen.x + (salaNueva.tamPared.x/2) + (salaNueva.tamPared.x*i), 1.25f, salaNueva.origen.y+salaNueva.tam.y), Quaternion.Euler(0,180,0));
+                salaNueva.listaParedes.Add(Instantiate(pared, new Vector3(salaNueva.origen.x + (salaNueva.tamPared.x/2) + (salaNueva.tamPared.x*i), 1.25f, salaNueva.origen.y+salaNueva.tam.y), Quaternion.Euler(0,180,0)));
             }
         }
         //Oeste
@@ -137,12 +162,61 @@ public class DungeonMasterScript : MonoBehaviour
         {
             if (salaNueva.origen.y + (salaNueva.tamPared.y/2) + (salaNueva.tamPared.y*i) == salaNueva.tam.y/2 && salaNueva.puertas[3] == 1)
             {
-                Instantiate(arco, new Vector3(salaNueva.origen.x, 1.25f, salaNueva.origen.y + (salaNueva.tamPared.y/2) + (salaNueva.tamPared.y*i)), Quaternion.Euler(0,90,0));
+                salaNueva.listaArcos.Add(Instantiate(arco, new Vector3(salaNueva.origen.x, 1.25f, salaNueva.origen.y + (salaNueva.tamPared.y/2) + (salaNueva.tamPared.y*i)), Quaternion.Euler(0,90,0)));
             }
             else
             {
-                Instantiate(pared, new Vector3(salaNueva.origen.x, 1.25f, salaNueva.origen.y + (salaNueva.tamPared.y/2) + (salaNueva.tamPared.y*i)), Quaternion.Euler(0,90,0));
+                salaNueva.listaParedes.Add(Instantiate(pared, new Vector3(salaNueva.origen.x, 1.25f, salaNueva.origen.y + (salaNueva.tamPared.y/2) + (salaNueva.tamPared.y*i)), Quaternion.Euler(0,90,0)));
             }
         }
     }
+
+    private int[] DeterminarArcos(int nArcos, int[] arcosAnterior)
+    {
+        int[] arreglo = arcosAnterior;
+        int indiceActual = 0;
+        int nActual = 0;
+
+        for(int i=0; i<4; i++)
+        {
+            if(arreglo[i] == 1)
+            {
+                nActual++;
+            }
+        }
+
+        while(nActual <= nArcos)
+        {
+            Debug.Log("Buscando arcos");
+            if(Random.Range(0,2) == 1 && arreglo[indiceActual] != 1)
+            {
+                Debug.Log($"Creando arco en {indiceActual}");
+                arreglo[indiceActual] = 1;
+                nActual++;
+            }
+            indiceActual++;
+            if(indiceActual > 3)
+            {
+                indiceActual = 0;
+            }
+        }
+        return arreglo;
+    }
+
+    private Sala.TipoSala DeterminarTipoSala(int tipo)
+    {
+        Debug.Log($"Tipo de la sala: {tipo}");
+        switch (tipo)
+        {
+            case 1: return Sala.TipoSala.INICIAL;
+            case 2: return Sala.TipoSala.MIXTA;
+            case 3: return Sala.TipoSala.ACERTIJO;
+            case 4: return Sala.TipoSala.COMBATE;
+            case 5: return Sala.TipoSala.JEFE;
+            case 6: return Sala.TipoSala.GRADA;
+            default: return Sala.TipoSala.MIXTA;
+        }
+    }
+
+
 }
