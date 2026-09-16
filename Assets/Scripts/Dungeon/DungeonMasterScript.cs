@@ -31,10 +31,10 @@ public class Sala
 
     public Sala()
     {
-        tamPared = new Vector3(2.5f,2.5f,0.5f);
-        tamArco = new Vector3(2.5f,2.5f,0.5f);
-        tamPiso = new Vector3(2.5f,0.5f,2.5f);
-        tam = new Vector2(12.5f,12.5f);
+        tamPared = new Vector3(2.54f,2.54f,0.5f);
+        tamArco = new Vector3(2.54f,2.54f,0.5f);
+        tamPiso = new Vector3(2.54f,0.5f,2.54f);
+        tam = new Vector2(12.7f,12.7f);
         origen = new Vector2(0,0);
         tipo = TipoSala.MIXTA;
         nivel = 1;
@@ -100,7 +100,7 @@ public class DungeonMasterScript : MonoBehaviour
         for(int i=0; i<listaSalas.Count; i++)
         {
             //Instanciamos los elementos de la sala.
-            Debug.Log($"Sala ({listaSalas[i].origen.x},{listaSalas[i].origen.y})\nTipo: {listaSalas[i].tipo}\nPuertas: [{listaSalas[i].puertas[0]}, {listaSalas[i].puertas[1]}, {listaSalas[i].puertas[2]}, {listaSalas[i].puertas[3]}]");
+            //Debug.Log($"Sala ({listaSalas[i].origen.x},{listaSalas[i].origen.y})\nTipo: {listaSalas[i].tipo}\nPuertas: [{listaSalas[i].puertas[0]}, {listaSalas[i].puertas[1]}, {listaSalas[i].puertas[2]}, {listaSalas[i].puertas[3]}]");
             CrearSala(listaSalas[i]);
         }
     }
@@ -231,7 +231,7 @@ public class DungeonMasterScript : MonoBehaviour
     private int[] DeterminarArcos(int x, int y, int[,] mapaActual)
     {
         int[] arreglo = {0,0,0,0};
-        if(x == maxMapa)
+        if(x == maxMapa-1)
         {
             if(mapaActual[x,y+1] != 0){ arreglo[0] = 1; }
             if(mapaActual[x,y-1] != 0){ arreglo[2] = 1; }
@@ -249,7 +249,7 @@ public class DungeonMasterScript : MonoBehaviour
             return arreglo;
         }
 
-        else if(y == maxMapa)
+        else if(y == maxMapa-1)
         {
             if(mapaActual[x+1,y] != 0){ arreglo[1] = 1; }
             if(mapaActual[x,y-1] != 0){ arreglo[2] = 1; }
