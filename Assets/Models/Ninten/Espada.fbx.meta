@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 94999538831b78c43b81230b6855e65d
+guid: 7ee852cf5f00b4a48aeb0b924d9d9234
 ModelImporter:
   serializedVersion: 24501
   internalIDToNameTable: []
@@ -9,11 +9,6 @@ ModelImporter:
       assembly: UnityEngine.CoreModule
       name: recruits_sword_Gi_mt_gd_swA
     second: {fileID: 2100000, guid: 24d3436ceac720141b4e082d24c8034c, type: 2}
-  - first:
-      type: UnityEngine:Texture2D
-      assembly: UnityEngine.CoreModule
-      name: gd_swa_st
-    second: {fileID: 2800000, guid: 64c3b54bdb0dc744fb79da3e948df749, type: 3}
   materials:
     materialImportMode: 2
     materialName: 0

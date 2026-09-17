@@ -1,8 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Unity.Cinemachine;
-using Unity.VisualScripting;
-using System;
+using Unity.IntegerTime;
 
 
 public class ControladorNinten : MonoBehaviour
@@ -31,12 +30,18 @@ public class ControladorNinten : MonoBehaviour
     //[SerializeField]
     private int puntuacion = 0;
     private int bufMagia = 2;
-    private int ataque = 1;
+    private int ataque = 4;
+    private int ataqueDistancia = 2;
+    private float cooldownDistancia = 2f;
+    private float timerDistancia = 0f;
+    private float cooldownMagia = 1f;
+    private float timerMagia = 0f;
     #endregion
 
     #region Banderas
     private bool interactuar = false;
     private bool magia = false;
+    private bool puedeDisparar;
     #endregion
 
     #region ObjetosExternos
@@ -44,9 +49,11 @@ public class ControladorNinten : MonoBehaviour
     private Rigidbody rigidBodyNinten;
     private CinemachineCamera camaraSeguimiento, camaraOrbital, camaraDisparo;
     private CinemachineBrain cinemachineCerebro;
-    GameObject dungeonMaster;
-    GameObject enemigoFijado;
-    Collider objetoInteractuable;
+    private GameObject dungeonMaster;
+    private GameObject enemigoFijado;
+    [SerializeField] private GameObject municionPrefab;
+
+    private Collider objetoInteractuable;
     private Animator animatorJugador;
     //private ControladorAudio controladorAudio;
     //private ControladorGUI controladorGUI;
@@ -56,6 +63,7 @@ public class ControladorNinten : MonoBehaviour
     {
         accionesEntrada = new AccionesNinten();
         rigidBodyNinten = GetComponent<Rigidbody>();
+        animatorJugador = GetComponent<Animator>();
     }
 
     void OnEnable()
@@ -82,7 +90,9 @@ public class ControladorNinten : MonoBehaviour
 
     void Start()
     {
+        camaraOrbital.Prioritize();
         vidaAnterior = vida;
+
     }
 
     #region OnControlador
@@ -120,6 +130,10 @@ public class ControladorNinten : MonoBehaviour
                 forwardCamara = new Vector3(0,0,0);
                 rightCamara = forwardCamara;
             break;
+            case EstadoJugador.DEFENDIENDO:
+                forwardCamara = new Vector3(0,0,0);
+                rightCamara = forwardCamara;
+            break;
             default:
                 forwardCamara = camaraOrbital.transform.forward;
                 rightCamara = camaraOrbital.transform.right;
@@ -131,11 +145,40 @@ public class ControladorNinten : MonoBehaviour
         rightCamara.Normalize();
         movimiento = (forwardCamara * entradaMovimiento.y + rightCamara * entradaMovimiento.x) * velocidadMovimiento;
         rigidBodyNinten.MovePosition(rigidBodyNinten.position + movimiento * Time.fixedDeltaTime);
-
+        if(estado != EstadoJugador.APUNTANDO)
+        {
+            animatorJugador.SetFloat("velocidad", entradaMovimiento.magnitude);
+        }
+        else
+        {
+            animatorJugador.SetFloat("velocidad", 0);
+        }
+        
         if(movimiento.sqrMagnitude > 0.001f)
         {
             rotacionNinten = Quaternion.LookRotation(movimiento, Vector3.up);
             transform.rotation = Quaternion.Slerp(transform.rotation, rotacionNinten, Time.deltaTime * velocidadRotacion);
+        }
+
+        timerDistancia += Time.deltaTime;
+        
+
+        if (magia)
+        {
+            timerMagia += Time.deltaTime;
+            if(timerMagia >= cooldownMagia)
+            {
+                timerMagia = 0;
+                cantidadMagia --;
+                //Debug.Log($"Magia: {cantidadMagia}");
+                if(cantidadMagia == 0)
+                {
+                    ataque /= bufMagia;
+                    ataqueDistancia /= bufMagia;
+                    magia = false;
+                    //Debug.Log($"{ataque}, {ataqueDistancia}");
+                }
+            }
         }
     }
 
@@ -149,16 +192,17 @@ public class ControladorNinten : MonoBehaviour
         {
             if (interactuar)//Hay un objeto con el que podemos interactuar.
             {
-                //animatorNinten.SetTrigger("Interactuar");
+                animatorJugador.SetTrigger("interactuar");
                 if(objetoInteractuable != null)
                 {
                     //Interactuamos con el objeto.
                     //StartCoroutine(objetoInteractuable.GetComponent<interaccionScript>().Interactuar(cinemachineCerebro, camaraOrbital));
                 }
             }
-            else if(rigidBodyNinten.linearVelocity.y == 0)//Saltamos si no estamos en movimiento en Y.
+            else if(rigidBodyNinten.linearVelocity.y <= 0.0001 && !animatorJugador.GetCurrentAnimatorStateInfo(0).IsName("Ninten_Saltar"))//Saltamos si no estamos en movimiento en Y.
             {
-                //animatorNinten.SetTrigger("Saltar");
+                Debug.Log("saltar.");
+                animatorJugador.SetTrigger("saltar");
                 rigidBodyNinten.AddForce(new Vector3(0,fuerzaSalto,0), ForceMode.Impulse);
             }
         }
@@ -178,7 +222,7 @@ public class ControladorNinten : MonoBehaviour
                 cinemachineCerebro.DefaultBlend.Time = 0.5f;
                 camaraOrbital.Prioritize();
             }
-            else//Cambiamos a la cámara de disparo.
+            else if(estado != EstadoJugador.DEFENDIENDO)
             {
                 estado = EstadoJugador.APUNTANDO;
                 cinemachineCerebro.DefaultBlend.Time = 0;
@@ -194,14 +238,17 @@ public class ControladorNinten : MonoBehaviour
             if (magia)
             {
                 ataque /= bufMagia;
+                ataqueDistancia /= bufMagia;
+                magia = false;
                 //Desactivamos efecto especial (particulas).
             }
-            else
+            else if(cantidadMagia > 0)
             {
                 ataque *= bufMagia;
+                ataqueDistancia *= bufMagia;
+                magia = true;
                 //Activamos efecto especial (particulas).
             }
-            magia = !magia;
         }
     }
 
@@ -211,12 +258,12 @@ public class ControladorNinten : MonoBehaviour
         {
             if(estado == EstadoJugador.FIJANDO)//No cambiamos el estado ya que debe seguir fijando.
             {
-                //Animación de atacar.
+                animatorJugador.SetTrigger("atacar");
                 Debug.Log("Ataque fijado.");
             }
             else
             {
-                //Animación de atacar.
+                animatorJugador.SetTrigger("atacar");
                 estado = EstadoJugador.ATACANDO;
                 Debug.Log("Ataque.");
             }
@@ -231,13 +278,13 @@ public class ControladorNinten : MonoBehaviour
             {
                 estado = EstadoJugador.IDLE;
                 //Regresamos a Idle.
+                animatorJugador.SetBool("defender", false);
             }
             else
             {
                 estado = EstadoJugador.DEFENDIENDO;
-                //Animacion de defender.
+                animatorJugador.SetBool("defender", true);
             }
-            
         }
     }
 
@@ -246,8 +293,14 @@ public class ControladorNinten : MonoBehaviour
         if(estado != EstadoJugador.PAUSA)
         {
             if (estado == EstadoJugador.APUNTANDO){
-                Debug.Log("Disparando.");
-                //Crear la lógica del disparo.
+                if(timerDistancia > cooldownDistancia)
+                {
+                    timerDistancia = 0;
+                    //disparamos
+                    GameObject municion = Instantiate(municionPrefab, camaraDisparo.transform.position, camaraDisparo.transform.rotation);
+                    Rigidbody rb = municion.GetComponent<Rigidbody>();
+                    rb.AddForce(municion.transform.forward * 20, ForceMode.Impulse);
+                }
             }
             else
             {
@@ -257,9 +310,9 @@ public class ControladorNinten : MonoBehaviour
                     cinemachineCerebro.DefaultBlend.Time = 0.5f;
                     camaraOrbital.Prioritize();
                 }
-                else
+                else if(estado != EstadoJugador.DEFENDIENDO)
                 {
-                    enemigoFijado = EnemigoMasCercano(GameObject.FindGameObjectsWithTag("Enemigo"));
+                    SetEenemigoFijado(EnemigoMasCercano(GameObject.FindGameObjectsWithTag("Enemigo")));
                     if(enemigoFijado != null)
                     {
                         estado = EstadoJugador.FIJANDO;
@@ -336,7 +389,7 @@ public class ControladorNinten : MonoBehaviour
         }
     }
 
-    private void OTriggerExit(Collider other)
+    private void OnTriggerExit(Collider other)
     {
         if (other.tag == "Interactuable")
         {
@@ -374,6 +427,27 @@ public class ControladorNinten : MonoBehaviour
     public void SetPuntuacion(int puntuacionGetter)
     {
         puntuacion = puntuacionGetter;
+    }
+
+    public int GetAtaque()
+    {
+        return ataque;
+    }
+
+    public int GetAtaqueDistancia()
+    {
+        return ataqueDistancia;
+    }
+
+    public void SetEenemigoFijado(GameObject enemigo)
+    {
+        enemigoFijado = enemigo;
+        if (enemigoFijado == null)//Quitamos la fijación si no hay enemigo.
+        {
+            estado = EstadoJugador.IDLE;
+            cinemachineCerebro.DefaultBlend.Time = 0.5f;
+            camaraOrbital.Prioritize();
+        }
     }
     #endregion
 }
