@@ -11,16 +11,15 @@ public class EnemigoScript : MonoBehaviour
     [SerializeField] private float velocidad;
     [SerializeField] private float velocidadRotacion;
 
-    public int RecibirAtaque(int ataque)
-    {
-        vida -= ataque;
-        return vida;
-    }
-
     #region GetSet
     public void SetVida(int _vida)
     {
         vida = _vida;
+    }
+
+    public int GetVida()
+    {
+        return vida;
     }
 
     public void SetRangoAtaque(int rango)
@@ -85,11 +84,37 @@ public class EnemigoScript : MonoBehaviour
         return velocidadRotacion;
     }
 
+    public int GetAtaque()
+    {
+        return ataque;
+    }
+    #endregion
+
+    #region Funciones auxiliares.
+    public int RecibirAtaque(int _ataque)
+    {
+        vida -= _ataque;
+        Debug.Log($"Vida enemigo: {vida}");
+        return vida;
+    }
+
+    public bool PuedeAtacar()
+    {
+        return (estado == EstadoEnemigo.ATACANDO);
+    }
+
     public float DistanciaJugador(GameObject jugador)
     {
         float distancia = (jugador.transform.position - this.transform.position).sqrMagnitude;
         //Debug.Log($"Distancia a Ninten: {distancia}");
         return distancia;
+    }
+
+    public int Morir()
+    {
+        //La animación para morir se hace directamente en el Script de cada enemigo a través de una comprobación de la vida en cada update.
+        Destroy(this.gameObject, 10f);
+        return 10;//Puntos por derrotar enemigos.
     }
     #endregion
 }

@@ -9,6 +9,7 @@ public class LoboScript : MonoBehaviour
     bool perseguir = false;
     private Vector3 movimiento;
     private Quaternion rotacion;
+    bool muerto = false;
 
     void Awake()
     {
@@ -26,35 +27,44 @@ public class LoboScript : MonoBehaviour
 
     void Update()
     {
-        if(enemigoScript.DistanciaJugador(ninten) <= enemigoScript.GetRangoAtaque())
+        if (!muerto)
         {
-            enemigoScript.SetEstado("ATACANDO");
-            animatorEnemigo.SetBool("movimiento", false);
-            animatorEnemigo.SetTrigger("atacar");
-            perseguir = true;
-        }
-        else if(enemigoScript.DistanciaJugador(ninten) <= enemigoScript.GetRangoPerseguir())
-        {
-            enemigoScript.SetEstado("PERSIGUIENDO");
-            animatorEnemigo.SetBool("movimiento", true);
-            perseguir = true;
-        }
-        else
-        {
-            enemigoScript.SetEstado("IDLE");
-            animatorEnemigo.SetBool("movimiento", false);
-            perseguir = false;
-        }
-
-        if (perseguir)
-        {
-            movimiento = (ninten.transform.position - this.transform.position).normalized * enemigoScript.GetVelocidad();
-            movimiento.y = 0;
-            rigidBodyEnemigo.MovePosition(this.transform.position + movimiento * Time.fixedDeltaTime);
-            if(movimiento.sqrMagnitude > 0.001f)
+            if(enemigoScript.DistanciaJugador(ninten) <= enemigoScript.GetRangoAtaque())
             {
-                rotacion = Quaternion.LookRotation(movimiento, Vector3.up);
-                transform.rotation = Quaternion.Slerp(transform.rotation, rotacion, Time.deltaTime * enemigoScript.GetVelocidadRotacion());
+                enemigoScript.SetEstado("ATACANDO");
+                animatorEnemigo.SetBool("movimiento", false);
+                animatorEnemigo.SetTrigger("atacar");
+                perseguir = true;
+            }
+            else if(enemigoScript.DistanciaJugador(ninten) <= enemigoScript.GetRangoPerseguir())
+            {
+                enemigoScript.SetEstado("PERSIGUIENDO");
+                animatorEnemigo.SetBool("movimiento", true);
+                perseguir = true;
+            }
+            else
+            {
+                enemigoScript.SetEstado("IDLE");
+                animatorEnemigo.SetBool("movimiento", false);
+                perseguir = false;
+            }
+
+            if (perseguir)
+            {
+                movimiento = (ninten.transform.position - this.transform.position).normalized * enemigoScript.GetVelocidad();
+                movimiento.y = 0;
+                rigidBodyEnemigo.MovePosition(this.transform.position + movimiento * Time.fixedDeltaTime);
+                if(movimiento.sqrMagnitude > 0.001f)
+                {
+                    rotacion = Quaternion.LookRotation(movimiento, Vector3.up);
+                    transform.rotation = Quaternion.Slerp(transform.rotation, rotacion, Time.deltaTime * enemigoScript.GetVelocidadRotacion());
+                }
+            }
+
+            if(enemigoScript.GetVida() <= 0)
+            {
+                muerto = true;
+                animatorEnemigo.SetTrigger("morir");
             }
         }
     }

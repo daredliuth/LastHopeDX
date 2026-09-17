@@ -14,6 +14,7 @@ public class EspadaScript : MonoBehaviour
                 {
                     //Desfijamos el objeto
                     controladorNinten.SetEenemigoFijado(null);
+                    other.GetComponent<EnemigoScript>().Morir();
                 }
             }
         }

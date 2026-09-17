@@ -337,6 +337,44 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!1 &164596128 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -4728426434207774260, guid: a8368a1aff2027642af78c93dc439bd7, type: 3}
+  m_PrefabInstance: {fileID: 170877807}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &164596130
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 164596128}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f566f8a54c557244abcf9bf92d23e83, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AtaqueScript
+--- !u!65 &164596131
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 164596128}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 3, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1001 &170877807
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -429,6 +467,18 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: a8368a1aff2027642af78c93dc439bd7, type: 3}
       insertIndex: -1
       addedObject: {fileID: 170877814}
+    - targetCorrespondingSourceObject: {fileID: -4728426434207774260, guid: a8368a1aff2027642af78c93dc439bd7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 164596131}
+    - targetCorrespondingSourceObject: {fileID: -4728426434207774260, guid: a8368a1aff2027642af78c93dc439bd7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 164596130}
+    - targetCorrespondingSourceObject: {fileID: 2715566404302941441, guid: a8368a1aff2027642af78c93dc439bd7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 503182089}
+    - targetCorrespondingSourceObject: {fileID: 2715566404302941441, guid: a8368a1aff2027642af78c93dc439bd7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 503182088}
   m_SourcePrefab: {fileID: 100100000, guid: a8368a1aff2027642af78c93dc439bd7, type: 3}
 --- !u!1 &170877808 stripped
 GameObject:
@@ -452,6 +502,8 @@ MonoBehaviour:
   rangoPerseguir: 0
   estado: 0
   ataque: 1
+  velocidad: 0
+  velocidadRotacion: 0
 --- !u!54 &170877811
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -602,7 +654,7 @@ Transform:
   m_GameObject: {fileID: 192778210}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 6.25, y: 1, z: 6.25}
+  m_LocalPosition: {x: 6.75, y: 0.85, z: 4.75}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -890,6 +942,44 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineHardLookAt
   LookAtOffset: {x: 0, y: 0.5, z: 0}
+--- !u!1 &503182086 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2715566404302941441, guid: a8368a1aff2027642af78c93dc439bd7, type: 3}
+  m_PrefabInstance: {fileID: 170877807}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &503182088
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 503182086}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f566f8a54c557244abcf9bf92d23e83, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AtaqueScript
+--- !u!65 &503182089
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 503182086}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 3, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &619343182
 GameObject:
   m_ObjectHideFlags: 0

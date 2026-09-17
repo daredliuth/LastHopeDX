@@ -42,6 +42,7 @@ public class ControladorNinten : MonoBehaviour
     private bool interactuar = false;
     private bool magia = false;
     private bool puedeDisparar;
+    private bool muerto = false;
     #endregion
 
     #region ObjetosExternos
@@ -395,6 +396,28 @@ public class ControladorNinten : MonoBehaviour
         {
             interactuar = false;
             objetoInteractuable = null;
+        }
+    }
+
+    public int RecibirAtaque(int _ataque)
+    {
+        if(estado != EstadoJugador.DEFENDIENDO)
+        {
+            vida -= _ataque;
+        }
+        //Modificar GUI.
+        Debug.Log($"Vida Ninten: {vida}");
+        return vida;
+    }
+
+    public void Morir()
+    {
+        if (!muerto)
+        {
+            muerto = true;
+            //Animación muerte.
+            animatorJugador.SetTrigger("morir");
+            //Mostrar pantalla muerte.
         }
     }
     #endregion
