@@ -20,6 +20,7 @@ public class LoboScript : MonoBehaviour
         enemigoScript.SetEstado("IDLE");
         enemigoScript.SetVelocidad(1f);
         enemigoScript.SetVelocidadRotacion(5f);
+        enemigoScript.SetCooldownAtaque(10f);
         ninten = GameObject.FindGameObjectWithTag("Ninten");
         rigidBodyEnemigo = GetComponent<Rigidbody>();
         animatorEnemigo = GetComponent<Animator>();
@@ -29,12 +30,17 @@ public class LoboScript : MonoBehaviour
     {
         if (!muerto)
         {
+            enemigoScript.SetTimerAtaque(enemigoScript.GetTimerAtaque() + Time.deltaTime);
             if(enemigoScript.DistanciaJugador(ninten) <= enemigoScript.GetRangoAtaque())
             {
-                enemigoScript.SetEstado("ATACANDO");
-                animatorEnemigo.SetBool("movimiento", false);
-                animatorEnemigo.SetTrigger("atacar");
-                perseguir = true;
+                if(enemigoScript.GetTimerAtaque() >= enemigoScript.GetCooldownAtaque())
+                {
+                    enemigoScript.SetTimerAtaque(0);
+                    enemigoScript.SetEstado("ATACANDO");
+                    animatorEnemigo.SetBool("movimiento", false);
+                    animatorEnemigo.SetTrigger("atacar");
+                    perseguir = true;
+                }
             }
             else if(enemigoScript.DistanciaJugador(ninten) <= enemigoScript.GetRangoPerseguir())
             {
@@ -64,7 +70,9 @@ public class LoboScript : MonoBehaviour
             if(enemigoScript.GetVida() <= 0)
             {
                 muerto = true;
+                ninten.GetComponent<ControladorNinten>().AumentarPuntuacion(enemigoScript.Morir());
                 animatorEnemigo.SetTrigger("morir");
+                Debug.Log("Enemigo morido.");
             }
         }
     }

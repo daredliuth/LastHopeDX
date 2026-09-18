@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class EnemigoScript : MonoBehaviour
 {
-    public enum EstadoEnemigo{IDLE, PATRULLANDO, PERSIGUIENDO, ATACANDO}
+    public enum EstadoEnemigo{IDLE, PATRULLANDO, PERSIGUIENDO, ATACANDO, MUERTO}
     [SerializeField] private int vida;
     [SerializeField] private int rangoAtaque;
     [SerializeField] private int rangoPerseguir;
@@ -10,6 +10,8 @@ public class EnemigoScript : MonoBehaviour
     [SerializeField] private int ataque = 1;
     [SerializeField] private float velocidad;
     [SerializeField] private float velocidadRotacion;
+    [SerializeField] private float timerAtaque = 0;
+    [SerializeField] private float cooldownAtaque;
 
     #region GetSet
     public void SetVida(int _vida)
@@ -58,6 +60,9 @@ public class EnemigoScript : MonoBehaviour
             case "ATACANDO":
                 estado = EstadoEnemigo.ATACANDO;
             break;
+            case "MUERTO":
+                estado = EstadoEnemigo.MUERTO;
+            break;
             default:
                 estado = EstadoEnemigo.IDLE;
             break;
@@ -88,6 +93,26 @@ public class EnemigoScript : MonoBehaviour
     {
         return ataque;
     }
+
+    public void SetTimerAtaque(float _timerAtaque)
+    {
+        timerAtaque += _timerAtaque;
+    }
+
+    public float GetTimerAtaque()
+    {
+        return timerAtaque;
+    }
+
+    public void SetCooldownAtaque(float cooldown)
+    {
+        cooldownAtaque = cooldown;
+    }
+
+    public float GetCooldownAtaque()
+    {
+        return cooldownAtaque;
+    }
     #endregion
 
     #region Funciones auxiliares.
@@ -113,6 +138,7 @@ public class EnemigoScript : MonoBehaviour
     public int Morir()
     {
         //La animación para morir se hace directamente en el Script de cada enemigo a través de una comprobación de la vida en cada update.
+        estado = EstadoEnemigo.MUERTO;
         Destroy(this.gameObject, 10f);
         return 10;//Puntos por derrotar enemigos.
     }

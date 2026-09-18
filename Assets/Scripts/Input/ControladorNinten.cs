@@ -2,13 +2,14 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using Unity.Cinemachine;
 using Unity.IntegerTime;
+using Unity.VisualScripting;
 
 
 public class ControladorNinten : MonoBehaviour
 {
     #region VariablesJugador
     //Enum con los estados posibles del jugador.
-    private enum EstadoJugador{IDLE, CAMINANDO, CORRIENDO, SALTANDO, APUNTANDO, FIJANDO, ATACANDO, DEFENDIENDO, PAUSA}
+    private enum EstadoJugador{IDLE, CAMINANDO, CORRIENDO, SALTANDO, APUNTANDO, FIJANDO, ATACANDO, DEFENDIENDO, PAUSA, MUERTO}
 
     //[Header("Movimiento")]
     //[SerializeField]
@@ -28,7 +29,7 @@ public class ControladorNinten : MonoBehaviour
     //[SerializeField]
     private int cantidadMagia = 100;
     //[SerializeField]
-    private int puntuacion = 0;
+    [SerializeField] private int puntuacion = 0;
     private int bufMagia = 2;
     private int ataque = 4;
     private int ataqueDistancia = 2;
@@ -135,6 +136,10 @@ public class ControladorNinten : MonoBehaviour
                 forwardCamara = new Vector3(0,0,0);
                 rightCamara = forwardCamara;
             break;
+            case EstadoJugador.MUERTO:
+                forwardCamara = new Vector3(0,0,0);
+                rightCamara = forwardCamara;
+            break;
             default:
                 forwardCamara = camaraOrbital.transform.forward;
                 rightCamara = camaraOrbital.transform.right;
@@ -146,7 +151,7 @@ public class ControladorNinten : MonoBehaviour
         rightCamara.Normalize();
         movimiento = (forwardCamara * entradaMovimiento.y + rightCamara * entradaMovimiento.x) * velocidadMovimiento;
         rigidBodyNinten.MovePosition(rigidBodyNinten.position + movimiento * Time.fixedDeltaTime);
-        if(estado != EstadoJugador.APUNTANDO)
+        if(estado != EstadoJugador.APUNTANDO || estado != EstadoJugador.MUERTO)
         {
             animatorJugador.SetFloat("velocidad", entradaMovimiento.magnitude);
         }
@@ -164,7 +169,7 @@ public class ControladorNinten : MonoBehaviour
         timerDistancia += Time.deltaTime;
         
 
-        if (magia)
+        if (magia && estado != EstadoJugador.MUERTO)
         {
             timerMagia += Time.deltaTime;
             if(timerMagia >= cooldownMagia)
@@ -189,7 +194,7 @@ public class ControladorNinten : MonoBehaviour
         {
             //Estamos en pausa, confirmar la opción seleccionada.
         }
-        else//No estamos en pausa.
+        else if(estado != EstadoJugador.MUERTO)//No estamos en pausa.
         {
             if (interactuar)//Hay un objeto con el que podemos interactuar.
             {
@@ -202,7 +207,7 @@ public class ControladorNinten : MonoBehaviour
             }
             else if(rigidBodyNinten.linearVelocity.y <= 0.0001 && !animatorJugador.GetCurrentAnimatorStateInfo(0).IsName("Ninten_Saltar"))//Saltamos si no estamos en movimiento en Y.
             {
-                Debug.Log("saltar.");
+                //Debug.Log("saltar.");
                 animatorJugador.SetTrigger("saltar");
                 rigidBodyNinten.AddForce(new Vector3(0,fuerzaSalto,0), ForceMode.Impulse);
             }
@@ -215,7 +220,7 @@ public class ControladorNinten : MonoBehaviour
         {
             //Estamos en pausa, regresar o salir de la pausa.
         }
-        else//No estamos en pausa.
+        else if(estado != EstadoJugador.MUERTO)//No estamos en pausa.
         {
             if(estado == EstadoJugador.APUNTANDO)//Regresamos a la cámara orbital.
             {
@@ -234,7 +239,7 @@ public class ControladorNinten : MonoBehaviour
 
     private void OnMagia(InputAction.CallbackContext contexto)
     {
-        if(estado != EstadoJugador.PAUSA)//Actuar solo si no estamos en pausa.
+        if(estado != EstadoJugador.PAUSA && estado != EstadoJugador.MUERTO)//Actuar solo si no estamos en pausa.
         {
             if (magia)
             {
@@ -255,25 +260,25 @@ public class ControladorNinten : MonoBehaviour
 
     private void OnAtacar(InputAction.CallbackContext contexto)
     {
-        if(estado != EstadoJugador.PAUSA && PuedeAtacar())//Actuar solo si no estamos en pausa.
+        if(estado != EstadoJugador.PAUSA && PuedeAtacar() &&  estado != EstadoJugador.MUERTO)//Actuar solo si no estamos en pausa.
         {
             if(estado == EstadoJugador.FIJANDO)//No cambiamos el estado ya que debe seguir fijando.
             {
                 animatorJugador.SetTrigger("atacar");
-                Debug.Log("Ataque fijado.");
+                //Debug.Log("Ataque fijado.");
             }
             else
             {
                 animatorJugador.SetTrigger("atacar");
                 estado = EstadoJugador.ATACANDO;
-                Debug.Log("Ataque.");
+                //Debug.Log("Ataque.");
             }
         }
     }
 
     private void OnEscudo(InputAction.CallbackContext contexto)
     {
-        if(estado != EstadoJugador.PAUSA)//Actuar solo si no estamos en pausa.
+        if(estado != EstadoJugador.PAUSA  && estado != EstadoJugador.MUERTO)//Actuar solo si no estamos en pausa.
         {
             if(estado == EstadoJugador.DEFENDIENDO)
             {
@@ -291,7 +296,7 @@ public class ControladorNinten : MonoBehaviour
 
     private void OnFijarDisparar(InputAction.CallbackContext contexto)
     {
-        if(estado != EstadoJugador.PAUSA)
+        if(estado != EstadoJugador.PAUSA && estado != EstadoJugador.MUERTO)
         {
             if (estado == EstadoJugador.APUNTANDO){
                 if(timerDistancia > cooldownDistancia)
@@ -329,25 +334,27 @@ public class ControladorNinten : MonoBehaviour
 
     private void OnPausa(InputAction.CallbackContext contexto)
     {
-        if(estado == EstadoJugador.PAUSA)
+        if(estado != EstadoJugador.MUERTO)
         {
-            //controladorGUI.ActivarHUD();
-            //StartCoroutine(controladorAudio.FadeMixerVolume("MusicVolume", -25f, 1f));
-            //StartCoroutine(controladorAudio.FadeMixerVolume("MusicVolume", -15f, 2f));
-            //controladorAudio.ReproducirCancion(0);
-            Time.timeScale = 1f;
-            estado = EstadoJugador.IDLE;
+            if(estado == EstadoJugador.PAUSA)
+            {
+                //controladorGUI.ActivarHUD();
+                //StartCoroutine(controladorAudio.FadeMixerVolume("MusicVolume", -25f, 1f));
+                //StartCoroutine(controladorAudio.FadeMixerVolume("MusicVolume", -15f, 2f));
+                //controladorAudio.ReproducirCancion(0);
+                Time.timeScale = 1f;
+                estado = EstadoJugador.IDLE;
+            }
+            else
+            {
+                //controladorGUI.ActivarPausa();
+                //StartCoroutine(controladorAudio.FadeMixerVolume("MusicVolume", -25f, 1f));
+                //StartCoroutine(controladorAudio.FadeMixerVolume("MusicVolume", 5f, 1f));
+                //controladorAudio.ReproducirCancion(1);
+                Time.timeScale = 0f;
+                estado = EstadoJugador.PAUSA;
+            }
         }
-        else
-        {
-            //controladorGUI.ActivarPausa();
-            //StartCoroutine(controladorAudio.FadeMixerVolume("MusicVolume", -25f, 1f));
-            //StartCoroutine(controladorAudio.FadeMixerVolume("MusicVolume", 5f, 1f));
-            //controladorAudio.ReproducirCancion(1);
-            Time.timeScale = 0f;
-            estado = EstadoJugador.PAUSA;
-        }
-
     }
     #endregion
 
@@ -364,7 +371,7 @@ public class ControladorNinten : MonoBehaviour
         {
             for(int i=0; i < nEnemigos; i++)
             {
-                Debug.Log($"Enemigo {i}");
+                //Debug.Log($"Enemigo {i}");
                 distancia = (transform.position - enemigos[i].transform.position).sqrMagnitude;
                 if(distancia < distanciaMenor){
                     distanciaMenor = distancia;
@@ -406,7 +413,7 @@ public class ControladorNinten : MonoBehaviour
             vida -= _ataque;
         }
         //Modificar GUI.
-        Debug.Log($"Vida Ninten: {vida}");
+        //Debug.Log($"Vida Ninten: {vida}");
         return vida;
     }
 
@@ -414,11 +421,18 @@ public class ControladorNinten : MonoBehaviour
     {
         if (!muerto)
         {
+            estado = EstadoJugador.MUERTO;
             muerto = true;
             //Animación muerte.
             animatorJugador.SetTrigger("morir");
             //Mostrar pantalla muerte.
         }
+    }
+
+    public void AumentarPuntuacion(int puntos)
+    {
+        puntuacion += puntos;
+        //Modificar GUI.
     }
     #endregion
 

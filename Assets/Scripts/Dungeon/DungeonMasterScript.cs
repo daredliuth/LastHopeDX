@@ -66,7 +66,15 @@ public class DungeonMasterScript : MonoBehaviour
     [SerializeField] GameObject pared;
     [SerializeField] GameObject piso;
     [SerializeField] GameObject arco;
+    [SerializeField] GameObject lobo;
+    [SerializeField] List<GameObject> laberintos = new List<GameObject>();
+    GameObject ninten;
     int[,] mapa;
+
+    void Awake()
+    {
+        ninten = GameObject.FindGameObjectWithTag("Ninten");
+    }
 
     void Start()
     {
@@ -103,6 +111,8 @@ public class DungeonMasterScript : MonoBehaviour
             //Debug.Log($"Sala ({listaSalas[i].origen.x},{listaSalas[i].origen.y})\nTipo: {listaSalas[i].tipo}\nPuertas: [{listaSalas[i].puertas[0]}, {listaSalas[i].puertas[1]}, {listaSalas[i].puertas[2]}, {listaSalas[i].puertas[3]}]");
             CrearSala(listaSalas[i]);
         }
+
+        ColocarNPC(listaSalas);
     }
 
     private void CrearSala(Sala salaNueva)
@@ -296,6 +306,58 @@ public class DungeonMasterScript : MonoBehaviour
                 case 2: return Sala.TipoSala.ACERTIJO;
                 case 3: return Sala.TipoSala.COMBATE;
                 default: return Sala.TipoSala.MIXTA;
+            }
+        }
+    }
+
+    private void ColocarNPC(List<Sala> _salas)
+    {
+        for(int i=0; i<_salas.Count; i++)
+        {
+            Sala _sala = _salas[i];
+            if(_salas[i].tipo == Sala.TipoSala.COMBATE || _salas[i].tipo == Sala.TipoSala.MIXTA)
+            {
+                //Debug.Log("Combate, mixto.");
+                int cantidadEnemigos = Random.Range(1,3);
+                //Debug.Log($"Creando {cantidadEnemigos} enemigos.");
+                for (int j=0; j < cantidadEnemigos; j++)
+                {
+                    Vector3 posicion = new Vector3(_salas[i].origen.x + Random.Range(_salas[i].tam.x/4, (_salas[i].tam.x/4)*3),0.5f, _salas[i].origen.y + Random.Range(_salas[i].tam.y/4, (_salas[i].tam.y/4)*3));
+                    Instantiate(lobo, posicion, Quaternion.Euler(0,Random.Range(0,360),0));
+                    //Debug.Log($"Enemigo creado en: ({posicion.x},{posicion.y},{posicion.z})");
+                }
+            }
+            else if(_salas[i].tipo == Sala.TipoSala.ACERTIJO)
+            {
+                //Debug.Log("Acertijo.");
+                //Ponemos un acertijo.
+                Vector3 posicion = new Vector3(_salas[i].origen.x, 0, _salas[i].origen.y);
+                int laberinto = Random.Range(0, laberintos.Count);
+                //Debug.Log($"Conteo: {laberintos.Count}\nLaberinto: {laberinto}");
+                switch (laberinto)
+                {
+                    case 0:
+                        //Debug.Log("Laberinto 1");
+                        Instantiate(laberintos[0], posicion, Quaternion.identity);
+                    break;
+                    case 1:
+                        //Debug.Log("Laberinto 2");
+                        Instantiate(laberintos[1], posicion, Quaternion.identity);
+                    break;
+                    default:
+                        Instantiate(laberintos[0], posicion, Quaternion.identity);
+                    break;
+                }
+            }
+            else if(_salas[i].tipo == Sala.TipoSala.JEFE)
+            {
+                Debug.Log("Jefe.");
+                //Creamos un jefe dependiendo del nivel.
+            }
+            else if(_salas[i].tipo == Sala.TipoSala.GRADA)
+            {
+                Debug.Log("Grada.");
+                //Colocamos a Grada.
             }
         }
     }
