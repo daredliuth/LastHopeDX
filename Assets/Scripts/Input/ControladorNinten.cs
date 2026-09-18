@@ -13,7 +13,7 @@ public class ControladorNinten : MonoBehaviour
 
     //[Header("Movimiento")]
     //[SerializeField]
-    private float velocidadMovimiento = 0.25f;
+    private float velocidadMovimiento = 1f;
     //[SerializeField]
     private float fuerzaSalto = 3.0f;
     private Vector2 entradaMovimiento;
@@ -37,6 +37,8 @@ public class ControladorNinten : MonoBehaviour
     private float timerDistancia = 0f;
     private float cooldownMagia = 1f;
     private float timerMagia = 0f;
+    private float timerInvencible = 0f;
+    private float coolDownInvencible = 3f;
     #endregion
 
     #region Banderas
@@ -44,6 +46,7 @@ public class ControladorNinten : MonoBehaviour
     private bool magia = false;
     private bool puedeDisparar;
     private bool muerto = false;
+    private bool invencible = false;
     #endregion
 
     #region ObjetosExternos
@@ -184,6 +187,16 @@ public class ControladorNinten : MonoBehaviour
                     magia = false;
                     //Debug.Log($"{ataque}, {ataqueDistancia}");
                 }
+            }
+        }
+
+        if (invencible)
+        {
+            timerInvencible += Time.deltaTime;
+            if(timerInvencible >= coolDownInvencible)
+            {
+                timerInvencible = 0;
+                invencible = false;
             }
         }
     }
@@ -408,12 +421,13 @@ public class ControladorNinten : MonoBehaviour
 
     public int RecibirAtaque(int _ataque)
     {
-        if(estado != EstadoJugador.DEFENDIENDO)
+        if(estado != EstadoJugador.DEFENDIENDO && !invencible)
         {
+            invencible = true;
             vida -= _ataque;
         }
         //Modificar GUI.
-        //Debug.Log($"Vida Ninten: {vida}");
+        Debug.Log($"Vida Ninten: {vida}");
         return vida;
     }
 
@@ -423,6 +437,7 @@ public class ControladorNinten : MonoBehaviour
         {
             estado = EstadoJugador.MUERTO;
             muerto = true;
+            invencible = false;
             //Animación muerte.
             animatorJugador.SetTrigger("morir");
             //Mostrar pantalla muerte.
