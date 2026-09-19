@@ -9,6 +9,9 @@ TagManager:
   - CamaraOrbital
   - CamaraDisparo
   - Enemigo
+  - GradaDebil
+  - Grada
+  - DungeonMaster
   layers:
   - Default
   - TransparentFX

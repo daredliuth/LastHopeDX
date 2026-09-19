@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class EnemigoScript : MonoBehaviour
@@ -69,6 +70,19 @@ public class EnemigoScript : MonoBehaviour
         }
     }
 
+    public String GetEstado()
+    {
+        switch (estado)
+        {
+            case EstadoEnemigo.IDLE: return "IDLE";
+            case EstadoEnemigo.PATRULLANDO: return "PATRULLANDO";
+            case EstadoEnemigo.PERSIGUIENDO: return "PERSIGUIENDO";
+            case EstadoEnemigo.ATACANDO: return "ATACANDO";
+            case EstadoEnemigo.MUERTO: return "MUERTO";
+            default: return "IDLE";
+        }
+    }
+
     public void SetVelocidad(float _velocidad)
     {
         velocidad = _velocidad;
@@ -96,7 +110,7 @@ public class EnemigoScript : MonoBehaviour
 
     public void SetTimerAtaque(float _timerAtaque)
     {
-        timerAtaque += _timerAtaque;
+        timerAtaque = _timerAtaque;
     }
 
     public float GetTimerAtaque()
@@ -135,12 +149,12 @@ public class EnemigoScript : MonoBehaviour
         return distancia;
     }
 
-    public int Morir()
+    public int Morir(int puntos)
     {
         //La animación para morir se hace directamente en el Script de cada enemigo a través de una comprobación de la vida en cada update.
         estado = EstadoEnemigo.MUERTO;
         Destroy(this.gameObject, 10f);
-        return 10;//Puntos por derrotar enemigos.
+        return puntos;//Puntos por derrotar enemigos.
     }
     #endregion
 }

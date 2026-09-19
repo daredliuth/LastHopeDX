@@ -61,12 +61,16 @@ public class DungeonMasterScript : MonoBehaviour
 {
     private List<Sala> listaSalas = new List<Sala>();
     private int maxSalas = 6;
-    int maxMapa = 11;
-    int nivel = 1;
+    private int maxMapa = 11;
+    private int nivel = 1;
+    private bool modoHistoria = true;
+    
     [SerializeField] GameObject pared;
     [SerializeField] GameObject piso;
     [SerializeField] GameObject arco;
     [SerializeField] GameObject lobo;
+    [SerializeField] GameObject loboJefe;
+    [SerializeField] GameObject grada;
     [SerializeField] List<GameObject> laberintos = new List<GameObject>();
     GameObject ninten;
     int[,] mapa;
@@ -81,9 +85,8 @@ public class DungeonMasterScript : MonoBehaviour
         
         //Variables auxiliares para la generación de las salas del nivel.
         Vector2 posicionSalaActual = new Vector2(0,0);
-        int[] arcosSalaAnterior = {0,0,0,0};
+        //int[] arcosSalaAnterior = {0,0,0,0};
         mapa = new int[maxMapa,maxMapa];
-
         
         //Generación del mapa inicial.
         mapa = GenerarMapa(maxMapa, maxSalas);
@@ -113,6 +116,11 @@ public class DungeonMasterScript : MonoBehaviour
         }
 
         ColocarNPC(listaSalas);
+    }
+
+    private void GenerarNivel()
+    {
+        
     }
 
     private void CrearSala(Sala salaNueva)
@@ -351,14 +359,61 @@ public class DungeonMasterScript : MonoBehaviour
             }
             else if(_salas[i].tipo == Sala.TipoSala.JEFE)
             {
-                Debug.Log("Jefe.");
-                //Creamos un jefe dependiendo del nivel.
+                Vector3 posicion = new Vector3(_salas[i].origen.x + (_salas[i].tam.x/2), 0.5f, _salas[i].origen.y + (_salas[i].tam.y/2));
+                switch (nivel)
+                {
+                    case 1:
+                        Debug.Log("Nivel 1: Jefe lobo");
+                        Instantiate(loboJefe, posicion, Quaternion.identity);
+                    break;
+                    case 2:
+                        Debug.Log("Nivel 2: Jefe Draco");
+                        Instantiate(loboJefe, posicion, Quaternion.identity);
+                    break;
+                    case 3:
+                        Debug.Log("Nivel 3: Jefe Giigu");
+                        Instantiate(loboJefe, posicion, Quaternion.identity);
+                    break;
+                    default:
+                        Debug.Log("Sepa la madre, ponle un lobo pa que amarre.");
+                        Instantiate(loboJefe, posicion, Quaternion.identity);
+                    break;
+                }
             }
             else if(_salas[i].tipo == Sala.TipoSala.GRADA)
             {
                 Debug.Log("Grada.");
-                //Colocamos a Grada.
+                Vector3 posicion = new Vector3(_salas[i].origen.x + (_salas[i].tam.x/2), 0.2f, _salas[i].origen.y + (_salas[i].tam.y/2));
+                Instantiate(grada, posicion, Quaternion.identity);
             }
+        }
+    }
+
+    public void AumentarNivel()
+    {
+        GuardarJuego(modoHistoria);
+        nivel ++;
+        if(nivel == 4)
+        {
+            if(modoHistoria)
+            {
+                //Ganamos, créditos y menú principal.
+            }
+            nivel = 1;
+        }
+        Debug.Log($"Nuevo nivel: {nivel}");
+        //Generar nuevo nivel.
+    }
+
+    private void GuardarJuego(bool guardar)
+    {
+        if (guardar)
+        {
+            Debug.Log("Juego Guardado.");
+        }
+        else
+        {
+            Debug.Log("Tamos en modo supervivencia.");
         }
     }
 }

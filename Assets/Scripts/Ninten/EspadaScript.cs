@@ -13,8 +13,8 @@ public class EspadaScript : MonoBehaviour
                 if(vidaEnemigo <= 0)
                 {
                     //Desfijamos el objeto
-                    controladorNinten.SetEenemigoFijado(null);
-                    other.GetComponent<EnemigoScript>().Morir();
+                    controladorNinten.SetEnemigoFijado(null);
+                    //other.GetComponent<EnemigoScript>().Morir();
                 }
             }
         }

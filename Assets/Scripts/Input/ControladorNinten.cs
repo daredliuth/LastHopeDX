@@ -13,7 +13,7 @@ public class ControladorNinten : MonoBehaviour
 
     //[Header("Movimiento")]
     //[SerializeField]
-    private float velocidadMovimiento = 1f;
+    private float velocidadMovimiento = 0.35f;
     //[SerializeField]
     private float fuerzaSalto = 3.0f;
     private Vector2 entradaMovimiento;
@@ -56,9 +56,10 @@ public class ControladorNinten : MonoBehaviour
     private CinemachineBrain cinemachineCerebro;
     private GameObject dungeonMaster;
     private GameObject enemigoFijado;
+    private GameObject grada;
     [SerializeField] private GameObject municionPrefab;
 
-    private Collider objetoInteractuable;
+    private GameObject objetoInteractuable;
     private Animator animatorJugador;
     //private ControladorAudio controladorAudio;
     //private ControladorGUI controladorGUI;
@@ -91,6 +92,9 @@ public class ControladorNinten : MonoBehaviour
         camaraDisparo = GameObject.FindGameObjectWithTag("CamaraDisparo").GetComponent<CinemachineCamera>();
         cinemachineCerebro = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<CinemachineBrain>();
         camaraOrbital.Prioritize();
+
+        //Obtenemos a Grada
+        grada = GameObject.FindGameObjectWithTag("GradaDebil");
     }
 
     void Start()
@@ -214,8 +218,8 @@ public class ControladorNinten : MonoBehaviour
                 animatorJugador.SetTrigger("interactuar");
                 if(objetoInteractuable != null)
                 {
-                    //Interactuamos con el objeto.
-                    //StartCoroutine(objetoInteractuable.GetComponent<interaccionScript>().Interactuar(cinemachineCerebro, camaraOrbital));
+                    //Debug.Log($"Voy a interactuar con: {objetoInteractuable.name}");
+                    objetoInteractuable.GetComponent<ObjetoInteractuableScript>().Interactuar();
                 }
             }
             else if(rigidBodyNinten.linearVelocity.y <= 0.0001 && !animatorJugador.GetCurrentAnimatorStateInfo(0).IsName("Ninten_Saltar"))//Saltamos si no estamos en movimiento en Y.
@@ -244,6 +248,7 @@ public class ControladorNinten : MonoBehaviour
             else if(estado != EstadoJugador.DEFENDIENDO)
             {
                 estado = EstadoJugador.APUNTANDO;
+                SetEnemigoFijado(null);
                 cinemachineCerebro.DefaultBlend.Time = 0;
                 camaraDisparo.Prioritize();
             }
@@ -328,10 +333,12 @@ public class ControladorNinten : MonoBehaviour
                     estado = EstadoJugador.IDLE;
                     cinemachineCerebro.DefaultBlend.Time = 0.5f;
                     camaraOrbital.Prioritize();
+                    //Grada a Ninten.
+                    grada.GetComponent<GradaDebilScript>().DesfijarEnemigo();
                 }
                 else if(estado != EstadoJugador.DEFENDIENDO)
                 {
-                    SetEenemigoFijado(EnemigoMasCercano(GameObject.FindGameObjectsWithTag("Enemigo")));
+                    SetEnemigoFijado(EnemigoMasCercano(GameObject.FindGameObjectsWithTag("Enemigo")));
                     if(enemigoFijado != null)
                     {
                         estado = EstadoJugador.FIJANDO;
@@ -339,6 +346,8 @@ public class ControladorNinten : MonoBehaviour
                         camaraSeguimiento.LookAt = enemigoFijado.transform;
                         cinemachineCerebro.DefaultBlend.Time = 1.5f;
                         camaraSeguimiento.Prioritize();
+                        //Grada a Enemigo
+                        grada.GetComponent<GradaDebilScript>().FijarEnemigo(enemigoFijado);
                     }
                 }
             }
@@ -403,19 +412,21 @@ public class ControladorNinten : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.tag == "Interactuable")
+        if (other.tag == "Interactuable" || other.tag == "Grada")
         {
             interactuar = true;
-            objetoInteractuable = other;
+            objetoInteractuable = other.gameObject;
+            //Debug.Log($"Entré a un objeto interactuable: {objetoInteractuable.name}");
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.tag == "Interactuable")
+        if (other.tag == "Interactuable" || other.tag == "Grada")
         {
             interactuar = false;
             objetoInteractuable = null;
+            //Debug.Log("Salí de un objeto interactuable.");
         }
     }
 
@@ -428,6 +439,14 @@ public class ControladorNinten : MonoBehaviour
         }
         //Modificar GUI.
         Debug.Log($"Vida Ninten: {vida}");
+        return vida;
+    }
+
+    public int AumentarVida()
+    {
+        vida++;
+        //Modificar GUI.
+        Debug.Log($"Vida Ninten ++: {vida}");
         return vida;
     }
 
@@ -470,6 +489,7 @@ public class ControladorNinten : MonoBehaviour
     public void SetMagia(int magiaSetter)
     {
         cantidadMagia = magiaSetter;
+        //Modificar GUI.
     }
 
     public int GetPuntuacion()
@@ -491,7 +511,7 @@ public class ControladorNinten : MonoBehaviour
         return ataqueDistancia;
     }
 
-    public void SetEenemigoFijado(GameObject enemigo)
+    public void SetEnemigoFijado(GameObject enemigo)
     {
         enemigoFijado = enemigo;
         if (enemigoFijado == null)//Quitamos la fijación si no hay enemigo.
@@ -499,6 +519,7 @@ public class ControladorNinten : MonoBehaviour
             estado = EstadoJugador.IDLE;
             cinemachineCerebro.DefaultBlend.Time = 0.5f;
             camaraOrbital.Prioritize();
+            grada.GetComponent<GradaDebilScript>().DesfijarEnemigo();
         }
     }
     #endregion
