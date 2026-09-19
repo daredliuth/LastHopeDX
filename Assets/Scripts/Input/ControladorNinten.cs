@@ -125,6 +125,7 @@ public class ControladorNinten : MonoBehaviour
         entradaMovimiento = accionesEntrada.MapaAccionesNinten.Movimiento.ReadValue<Vector2>();
 
         //Selección de camara para el movimiento
+        //Debug.Log($"{estado}");
         switch (estado)
         {
             case EstadoJugador.FIJANDO:
@@ -132,6 +133,7 @@ public class ControladorNinten : MonoBehaviour
                 rightCamara = camaraSeguimiento.transform.right;
             break;
             case EstadoJugador.APUNTANDO:
+                //Debug.Log($"Estado: {estado}");
                 forwardCamara = new Vector3(0,0,0);
                 rightCamara = forwardCamara;
             break;
@@ -158,7 +160,7 @@ public class ControladorNinten : MonoBehaviour
         rightCamara.Normalize();
         movimiento = (forwardCamara * entradaMovimiento.y + rightCamara * entradaMovimiento.x) * velocidadMovimiento;
         rigidBodyNinten.MovePosition(rigidBodyNinten.position + movimiento * Time.fixedDeltaTime);
-        if(estado != EstadoJugador.APUNTANDO || estado != EstadoJugador.MUERTO)
+        if(estado != EstadoJugador.APUNTANDO && estado != EstadoJugador.MUERTO)
         {
             animatorJugador.SetFloat("velocidad", entradaMovimiento.magnitude);
         }
@@ -233,6 +235,7 @@ public class ControladorNinten : MonoBehaviour
 
     private void OnDistanciaCancelar(InputAction.CallbackContext contexto)
     {
+        Debug.Log($"Ondistanciacancelar ele estado es: {estado}");
         if(estado == EstadoJugador.PAUSA)
         {
             //Estamos en pausa, regresar o salir de la pausa.
@@ -241,12 +244,14 @@ public class ControladorNinten : MonoBehaviour
         {
             if(estado == EstadoJugador.APUNTANDO)//Regresamos a la cámara orbital.
             {
+                Debug.Log("Distancia cancelar lo mandé a aIDLE");
                 estado = EstadoJugador.IDLE;
                 cinemachineCerebro.DefaultBlend.Time = 0.5f;
                 camaraOrbital.Prioritize();
             }
             else if(estado != EstadoJugador.DEFENDIENDO)
             {
+                Debug.Log("Vamo a apuntar");
                 estado = EstadoJugador.APUNTANDO;
                 SetEnemigoFijado(null);
                 cinemachineCerebro.DefaultBlend.Time = 0;
@@ -300,6 +305,7 @@ public class ControladorNinten : MonoBehaviour
         {
             if(estado == EstadoJugador.DEFENDIENDO)
             {
+                Debug.Log("Escudo lo mandé a IDLE");
                 estado = EstadoJugador.IDLE;
                 //Regresamos a Idle.
                 animatorJugador.SetBool("defender", false);
@@ -316,9 +322,12 @@ public class ControladorNinten : MonoBehaviour
     {
         if(estado != EstadoJugador.PAUSA && estado != EstadoJugador.MUERTO)
         {
+            Debug.Log($"En fijar/Disaparar el estado es: {estado}");
             if (estado == EstadoJugador.APUNTANDO){
+                Debug.Log("Toy apuntadnod");
                 if(timerDistancia > cooldownDistancia)
                 {
+                    Debug.Log("Disparé");
                     timerDistancia = 0;
                     //disparamos
                     GameObject municion = Instantiate(municionPrefab, camaraDisparo.transform.position, camaraDisparo.transform.rotation);
@@ -330,6 +339,7 @@ public class ControladorNinten : MonoBehaviour
             {
                 if (estado == EstadoJugador.FIJANDO)
                 {
+                    Debug.Log("Fijando lo mandé a OIDELÑ");
                     estado = EstadoJugador.IDLE;
                     cinemachineCerebro.DefaultBlend.Time = 0.5f;
                     camaraOrbital.Prioritize();
@@ -365,6 +375,7 @@ public class ControladorNinten : MonoBehaviour
                 //StartCoroutine(controladorAudio.FadeMixerVolume("MusicVolume", -15f, 2f));
                 //controladorAudio.ReproducirCancion(0);
                 Time.timeScale = 1f;
+                Debug.Log("Pausa lo mande a IDLE");
                 estado = EstadoJugador.IDLE;
             }
             else
@@ -516,7 +527,8 @@ public class ControladorNinten : MonoBehaviour
         enemigoFijado = enemigo;
         if (enemigoFijado == null)//Quitamos la fijación si no hay enemigo.
         {
-            estado = EstadoJugador.IDLE;
+            if(estado != EstadoJugador.APUNTANDO){ estado = EstadoJugador.IDLE;Debug.Log("setenemigo fijado lo mandé a IDLE"); }
+            
             cinemachineCerebro.DefaultBlend.Time = 0.5f;
             camaraOrbital.Prioritize();
             grada.GetComponent<GradaDebilScript>().DesfijarEnemigo();

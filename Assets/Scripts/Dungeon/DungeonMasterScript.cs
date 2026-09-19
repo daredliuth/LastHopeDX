@@ -71,9 +71,11 @@ public class DungeonMasterScript : MonoBehaviour
     [SerializeField] GameObject lobo;
     [SerializeField] GameObject loboJefe;
     [SerializeField] GameObject grada;
+    [SerializeField] GameObject migle;
     [SerializeField] List<GameObject> laberintos = new List<GameObject>();
     GameObject ninten;
     int[,] mapa;
+    Vector2 posicionSalaActual;
 
     void Awake()
     {
@@ -82,15 +84,19 @@ public class DungeonMasterScript : MonoBehaviour
 
     void Start()
     {
-        
         //Variables auxiliares para la generación de las salas del nivel.
-        Vector2 posicionSalaActual = new Vector2(0,0);
+        
         //int[] arcosSalaAnterior = {0,0,0,0};
         mapa = new int[maxMapa,maxMapa];
-        
-        //Generación del mapa inicial.
-        mapa = GenerarMapa(maxMapa, maxSalas);
+        posicionSalaActual = new Vector2(0,0);
 
+        GenerarNivel();
+    }
+
+    private void GenerarNivel()
+    {
+        //Generación del mapa.
+        mapa = GenerarMapa(maxMapa, maxSalas);
         //Recorrido del mapa para crear las salas.
         for(int i=0; i < maxMapa; i++)
         {
@@ -114,13 +120,43 @@ public class DungeonMasterScript : MonoBehaviour
             //Debug.Log($"Sala ({listaSalas[i].origen.x},{listaSalas[i].origen.y})\nTipo: {listaSalas[i].tipo}\nPuertas: [{listaSalas[i].puertas[0]}, {listaSalas[i].puertas[1]}, {listaSalas[i].puertas[2]}, {listaSalas[i].puertas[3]}]");
             CrearSala(listaSalas[i]);
         }
-
+        ninten.transform.position = new Vector3(listaSalas[0].tam.x/2, 0.15f, listaSalas[0].tam.x/4);
         ColocarNPC(listaSalas);
     }
 
-    private void GenerarNivel()
+    private void BorrarNivel()
     {
-        
+        BorrarMapa(maxMapa);
+        GameObject[] arcos = GameObject.FindGameObjectsWithTag("Arco");
+        GameObject[] paredes = GameObject.FindGameObjectsWithTag("Pared");
+        GameObject[] pisos = GameObject.FindGameObjectsWithTag("Piso");
+        GameObject[] enemigos = GameObject.FindGameObjectsWithTag("Enemigo");
+
+        for(int i=0; i < arcos.Length; i++){ Destroy(arcos[i]); }
+        for(int i=0; i < paredes.Length; i++){ Destroy(paredes[i]); }
+        for(int i=0; i < enemigos.Length; i++){ Destroy(enemigos[i]); }
+        for(int i=0; i < pisos.Length; i++){ Destroy(pisos[i]); }
+        GameObject gradaEliminar = GameObject.FindGameObjectWithTag("Grada");
+        if(gradaEliminar == null)
+        {
+            Debug.Log("No hay Grada-");
+        }
+        Destroy(gradaEliminar);
+
+        listaSalas.Clear();
+
+        posicionSalaActual = new Vector2(0,0);
+    }
+
+    private void BorrarMapa(int tamMapa)
+    {
+        for (int i=0; i< tamMapa; i++)
+        {
+            for(int j=0; j<tamMapa; j++)
+            {
+                mapa[i,j] = 0;
+            }
+        }
     }
 
     private void CrearSala(Sala salaNueva)
@@ -331,8 +367,27 @@ public class DungeonMasterScript : MonoBehaviour
                 for (int j=0; j < cantidadEnemigos; j++)
                 {
                     Vector3 posicion = new Vector3(_salas[i].origen.x + Random.Range(_salas[i].tam.x/4, (_salas[i].tam.x/4)*3),0.5f, _salas[i].origen.y + Random.Range(_salas[i].tam.y/4, (_salas[i].tam.y/4)*3));
-                    Instantiate(lobo, posicion, Quaternion.Euler(0,Random.Range(0,360),0));
+                    //Instantiate(lobo, posicion, Quaternion.Euler(0,Random.Range(0,360),0));
                     //Debug.Log($"Enemigo creado en: ({posicion.x},{posicion.y},{posicion.z})");
+                    switch (nivel)
+                    {
+                        case 1:
+                            //Debug.Log("Nivel 1: lobo");
+                            Instantiate(lobo, posicion, Quaternion.Euler(0,Random.Range(0,360),0));
+                        break;
+                        case 2:
+                            //Debug.Log("Nivel 2: Migle");
+                            Instantiate(migle, posicion, Quaternion.Euler(0,Random.Range(0,360),0));
+                        break;
+                        case 3:
+                            //Debug.Log("Nivel 3: Demonio");
+                            Instantiate(lobo, posicion, Quaternion.Euler(0,Random.Range(0,360),0));
+                        break;
+                        default:
+                            //Debug.Log("Sepa la madre, ponle un lobo pa que amarre.");
+                            Instantiate(lobo, posicion, Quaternion.identity);
+                        break;
+                    }
                 }
             }
             else if(_salas[i].tipo == Sala.TipoSala.ACERTIJO)
@@ -363,46 +418,48 @@ public class DungeonMasterScript : MonoBehaviour
                 switch (nivel)
                 {
                     case 1:
-                        Debug.Log("Nivel 1: Jefe lobo");
+                        //Debug.Log("Nivel 1: Jefe lobo");
                         Instantiate(loboJefe, posicion, Quaternion.identity);
                     break;
                     case 2:
-                        Debug.Log("Nivel 2: Jefe Draco");
+                        //Debug.Log("Nivel 2: Jefe Draco");
                         Instantiate(loboJefe, posicion, Quaternion.identity);
                     break;
                     case 3:
-                        Debug.Log("Nivel 3: Jefe Giigu");
+                        //Debug.Log("Nivel 3: Jefe Giigu");
                         Instantiate(loboJefe, posicion, Quaternion.identity);
                     break;
                     default:
-                        Debug.Log("Sepa la madre, ponle un lobo pa que amarre.");
+                        //Debug.Log("Sepa la madre, ponle un lobo pa que amarre.");
                         Instantiate(loboJefe, posicion, Quaternion.identity);
                     break;
                 }
             }
             else if(_salas[i].tipo == Sala.TipoSala.GRADA)
             {
-                Debug.Log("Grada.");
                 Vector3 posicion = new Vector3(_salas[i].origen.x + (_salas[i].tam.x/2), 0.2f, _salas[i].origen.y + (_salas[i].tam.y/2));
                 Instantiate(grada, posicion, Quaternion.identity);
+                Debug.Log($"Grada. ({posicion.x},{posicion.y},{posicion.z})");
             }
         }
     }
 
     public void AumentarNivel()
     {
-        GuardarJuego(modoHistoria);
         nivel ++;
+        GuardarJuego(modoHistoria);
         if(nivel == 4)
         {
             if(modoHistoria)
             {
                 //Ganamos, créditos y menú principal.
+                Debug.Log("¡Ganastes!");
             }
             nivel = 1;
         }
         Debug.Log($"Nuevo nivel: {nivel}");
-        //Generar nuevo nivel.
+        BorrarNivel();
+        GenerarNivel();
     }
 
     private void GuardarJuego(bool guardar)

@@ -12,7 +12,7 @@ public class DisparoScript : MonoBehaviour
     {
         if(other.tag == "Enemigo")
         {
-            ControladorNinten controladorNinten = GameObject.FindGameObjectWithTag("Ninten").GetComponent<ControladorNinten>();;
+            ControladorNinten controladorNinten = GameObject.FindGameObjectWithTag("Ninten").GetComponent<ControladorNinten>();
             other.GetComponent<EnemigoScript>().RecibirAtaque(controladorNinten.GetAtaqueDistancia());
             Destroy(this.gameObject);
         }
