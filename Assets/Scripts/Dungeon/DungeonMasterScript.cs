@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 public class Sala
 {
@@ -83,6 +84,19 @@ public class DungeonMasterScript : MonoBehaviour
     void Awake()
     {
         ninten = GameObject.FindGameObjectWithTag("Ninten");
+        // Detectar la escena actual
+        string nombreEscena = SceneManager.GetActiveScene().name;
+
+        // Cambiar el modo según el nombre de la escena
+        if (nombreEscena == "HistoriaEscena")
+        {
+            modoHistoria = true;
+        }
+        else
+        {
+            modoHistoria = false;
+        }
+        Debug.Log("Escena actual: " + nombreEscena);
     }
 
     void Start()

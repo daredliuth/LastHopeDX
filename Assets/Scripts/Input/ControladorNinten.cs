@@ -70,6 +70,7 @@ public class ControladorNinten : MonoBehaviour
         accionesEntrada = new AccionesNinten();
         rigidBodyNinten = GetComponent<Rigidbody>();
         animatorJugador = GetComponent<Animator>();
+        grada = GameObject.FindGameObjectWithTag("GradaDebil");
     }
 
     void OnEnable()
@@ -543,6 +544,7 @@ public class ControladorNinten : MonoBehaviour
             
             cinemachineCerebro.DefaultBlend.Time = 0.5f;
             camaraOrbital.Prioritize();
+            grada = GameObject.FindGameObjectWithTag("GradaDebil");
             grada.GetComponent<GradaDebilScript>().DesfijarEnemigo();
         }
     }
