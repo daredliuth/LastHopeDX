@@ -62,7 +62,7 @@ public class ControladorNinten : MonoBehaviour
     private GameObject objetoInteractuable;
     private Animator animatorJugador;
     //private ControladorAudio controladorAudio;
-    //private ControladorGUI controladorGUI;
+    private ControladorGUI controladorGUI;
     #endregion
 
     void Awake()
@@ -92,6 +92,9 @@ public class ControladorNinten : MonoBehaviour
         camaraDisparo = GameObject.FindGameObjectWithTag("CamaraDisparo").GetComponent<CinemachineCamera>();
         cinemachineCerebro = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<CinemachineBrain>();
         camaraOrbital.Prioritize();
+
+        controladorGUI = gameObject.GetComponent<ControladorGUI>();
+        controladorGUI.ActivarHUD();
 
         //Obtenemos a Grada
         grada = GameObject.FindGameObjectWithTag("GradaDebil");
@@ -204,6 +207,15 @@ public class ControladorNinten : MonoBehaviour
                 timerInvencible = 0;
                 invencible = false;
             }
+        }
+
+        if(vida < vidaAnterior)
+        {
+            controladorGUI.DisminuirZanahorias(vida);
+        }
+        if(vida > vidaAnterior)
+        {
+            controladorGUI.AumentarZanahorias(vida);
         }
     }
 
@@ -370,7 +382,7 @@ public class ControladorNinten : MonoBehaviour
         {
             if(estado == EstadoJugador.PAUSA)
             {
-                //controladorGUI.ActivarHUD();
+                controladorGUI.ActivarHUD();
                 //StartCoroutine(controladorAudio.FadeMixerVolume("MusicVolume", -25f, 1f));
                 //StartCoroutine(controladorAudio.FadeMixerVolume("MusicVolume", -15f, 2f));
                 //controladorAudio.ReproducirCancion(0);
@@ -380,7 +392,7 @@ public class ControladorNinten : MonoBehaviour
             }
             else
             {
-                //controladorGUI.ActivarPausa();
+                controladorGUI.ActivarPausa();
                 //StartCoroutine(controladorAudio.FadeMixerVolume("MusicVolume", -25f, 1f));
                 //StartCoroutine(controladorAudio.FadeMixerVolume("MusicVolume", 5f, 1f));
                 //controladorAudio.ReproducirCancion(1);

@@ -16,6 +16,9 @@ TagManager:
   - Arco
   - Pared
   - Piso
+  - HUD
+  - Pausa
+  - Fin
   layers:
   - Default
   - TransparentFX
