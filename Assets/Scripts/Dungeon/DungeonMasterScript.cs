@@ -72,6 +72,7 @@ public class DungeonMasterScript : MonoBehaviour
     [SerializeField] GameObject loboJefe;
     [SerializeField] GameObject grada;
     [SerializeField] GameObject migle;
+    [SerializeField] GameObject draco;
     [SerializeField] List<GameObject> laberintos = new List<GameObject>();
     GameObject ninten;
     int[,] mapa;
@@ -423,7 +424,7 @@ public class DungeonMasterScript : MonoBehaviour
                     break;
                     case 2:
                         //Debug.Log("Nivel 2: Jefe Draco");
-                        Instantiate(loboJefe, posicion, Quaternion.identity);
+                        Instantiate(draco, posicion, Quaternion.identity);
                     break;
                     case 3:
                         //Debug.Log("Nivel 3: Jefe Giigu");

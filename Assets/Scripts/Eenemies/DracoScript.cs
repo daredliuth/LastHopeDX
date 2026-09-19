@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class MigleScript : MonoBehaviour
+public class DracoScript : MonoBehaviour
 {
     EnemigoScript enemigoScript;
     GameObject ninten;
@@ -15,13 +15,13 @@ public class MigleScript : MonoBehaviour
     void Awake()
     {
         enemigoScript = gameObject.GetComponent<EnemigoScript>();
-        enemigoScript.SetVida(3);
-        enemigoScript.SetRangoAtaque(6);
+        enemigoScript.SetVida(6);
+        enemigoScript.SetRangoAtaque(8);
         enemigoScript.SetRangoPerseguir(10);
         enemigoScript.SetEstado("IDLE");
-        enemigoScript.SetVelocidad(1f);
+        enemigoScript.SetVelocidad(0.75f);
         enemigoScript.SetVelocidadRotacion(5f);
-        enemigoScript.SetCooldownAtaque(8f);
+        enemigoScript.SetCooldownAtaque(5f);
         ninten = GameObject.FindGameObjectWithTag("Ninten");
         rigidBodyEnemigo = GetComponent<Rigidbody>();
         animatorEnemigo = GetComponent<Animator>();
@@ -72,7 +72,7 @@ public class MigleScript : MonoBehaviour
             if(enemigoScript.GetVida() <= 0)
             {
                 muerto = true;
-                ninten.GetComponent<ControladorNinten>().AumentarPuntuacion(enemigoScript.Morir(500));
+                ninten.GetComponent<ControladorNinten>().AumentarPuntuacion(enemigoScript.Morir(2500));
                 rigidBodyEnemigo.useGravity = true;
                 gameObject.GetComponent<Collider>().isTrigger = false;
                 //animatorEnemigo.SetTrigger("morir");

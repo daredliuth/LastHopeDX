@@ -3736,6 +3736,7 @@ MonoBehaviour:
   loboJefe: {fileID: 2914602856820430561, guid: 3ec9967294ff0e541ab21646e6059de1, type: 3}
   grada: {fileID: 3443147270079446843, guid: 0a82c969cf20c8745bcb59498eea4f36, type: 3}
   migle: {fileID: 3102359271334003936, guid: 231dd3bd55bf8f34fb6077e348116972, type: 3}
+  draco: {fileID: 6017855042313182882, guid: 9297a0f605e7ed34faebded53f5d4777, type: 3}
   laberintos:
   - {fileID: 3507819991033669802, guid: ba56a44c331e7734eaa08fbf4b53f476, type: 3}
   - {fileID: 2525948895574227519, guid: 76663c84867221044a56ce3d872092ed, type: 3}
