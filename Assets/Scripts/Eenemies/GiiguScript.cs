@@ -1,8 +1,8 @@
 using UnityEngine;
 
-public class DemonioScript : MonoBehaviour
+public class GiiguScript : MonoBehaviour
 {
-    EnemigoScript enemigoScript;
+EnemigoScript enemigoScript;
     GameObject ninten;
     private Rigidbody rigidBodyEnemigo;
     private Animator animatorEnemigo;
@@ -14,13 +14,13 @@ public class DemonioScript : MonoBehaviour
     void Awake()
     {
         enemigoScript = gameObject.GetComponent<EnemigoScript>();
-        enemigoScript.SetVida(8);
+        enemigoScript.SetVida(32);
         enemigoScript.SetRangoAtaque(1);
         enemigoScript.SetRangoPerseguir(12);
         enemigoScript.SetEstado("IDLE");
         enemigoScript.SetVelocidad(1.75f);
         enemigoScript.SetVelocidadRotacion(8f);
-        enemigoScript.SetCooldownAtaque(7f);
+        enemigoScript.SetCooldownAtaque(4f);
         ninten = GameObject.FindGameObjectWithTag("Ninten");
         rigidBodyEnemigo = GetComponent<Rigidbody>();
         animatorEnemigo = GetComponent<Animator>();

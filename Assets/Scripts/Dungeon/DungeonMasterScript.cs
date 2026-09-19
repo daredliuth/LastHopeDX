@@ -73,6 +73,8 @@ public class DungeonMasterScript : MonoBehaviour
     [SerializeField] GameObject grada;
     [SerializeField] GameObject migle;
     [SerializeField] GameObject draco;
+    [SerializeField] GameObject demonio;
+    [SerializeField] GameObject giigu;
     [SerializeField] List<GameObject> laberintos = new List<GameObject>();
     GameObject ninten;
     int[,] mapa;
@@ -382,7 +384,7 @@ public class DungeonMasterScript : MonoBehaviour
                         break;
                         case 3:
                             //Debug.Log("Nivel 3: Demonio");
-                            Instantiate(lobo, posicion, Quaternion.Euler(0,Random.Range(0,360),0));
+                            Instantiate(demonio, posicion, Quaternion.Euler(0,Random.Range(0,360),0));
                         break;
                         default:
                             //Debug.Log("Sepa la madre, ponle un lobo pa que amarre.");
@@ -428,7 +430,7 @@ public class DungeonMasterScript : MonoBehaviour
                     break;
                     case 3:
                         //Debug.Log("Nivel 3: Jefe Giigu");
-                        Instantiate(loboJefe, posicion, Quaternion.identity);
+                        Instantiate(giigu, posicion, Quaternion.identity);
                     break;
                     default:
                         //Debug.Log("Sepa la madre, ponle un lobo pa que amarre.");
@@ -467,11 +469,31 @@ public class DungeonMasterScript : MonoBehaviour
     {
         if (guardar)
         {
+            SaveData datos = new SaveData();
+            datos.nivel = nivel;
+            datos.puntuacion = ninten.GetComponent<ControladorNinten>().GetPuntuacion();
+            datos.volumenMusica = PlayerPrefs.GetFloat("MusicVolume");
+            datos.volumenSFX = PlayerPrefs.GetFloat("SFXVolume");
+            datos.volumenMaster = PlayerPrefs.GetFloat("MasterVolume");
+            SaveManager.GuardarJuego(datos);
             Debug.Log("Juego Guardado.");
         }
         else
         {
             Debug.Log("Tamos en modo supervivencia.");
         }
+    }
+
+    private void CargarJuego()
+    {
+        SaveData datos = SaveManager.CargarJuego();
+        if(datos != null)
+        {
+            nivel = datos.nivel;
+            ninten.GetComponent<ControladorNinten>().SetPuntuacion(datos.puntuacion);
+            PlayerPrefs.SetFloat("MusicVolume", datos.volumenMusica);
+            PlayerPrefs.SetFloat("SFXVolume", datos.volumenSFX);
+            PlayerPrefs.SetFloat("MasterVolume", datos.volumenMaster);
+        }    
     }
 }
